@@ -1,0 +1,13 @@
+.input-container {
+  width: calc(100% / 3);
+  margin: 0 auto;
+  display: flex;
+  padding: 1rem;
+  border: 1px solid;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.input-container > input {
+  padding: 0.5rem;
+}
