@@ -2,11 +2,12 @@ import { useState } from 'react'
 import './Note.css'
 
 
-function Note({title,content,date, category,onView}){
+function Note({title,content,date,lastModify, category,onView}){
     return <>
         <div className='note-container' onClick={onView} style={{cursor: 'pointer'}}>
             <div>
                 {date}
+                {lastModify}
             </div>
             <div>
                 {title }

@@ -10,9 +10,10 @@ function NotesList({ notes , onViewNote}) {
     < >
         {notes.map((note,index) => (<Note
             key={note.id}
-            title={note.title ==="" ? `Note ${index +1}` : note.title}
+            title={note.title ==="" ? `Note ${index + 1}` : note.title}
             content={note.content}
             date={note.date}
+            lastModify={note.lastModified}
             category={note.category}
             onView = {()=> onViewNote(note)}
           />
