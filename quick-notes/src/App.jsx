@@ -15,6 +15,14 @@ function App() {
 
   const [editedTitle, setEditTitle] = useState("");
   const [editedContent, setEditContent] = useState("");
+  const [toBeDeleted,setOnDelete] = useState(false);
+
+
+
+const handleOnDelete = (note)=>{
+    const newNotes = notes.filter(item => item.id !== note.id)
+    setNotes(newNotes)
+}
 
   const addNote = (noteData) => {
     const newNote = {
@@ -77,7 +85,7 @@ function App() {
       </div>
 
       <div className="notes-list-container">
-        <NotesList notes={notes} onViewNote={handleViewNote} />
+        <NotesList notes={notes} onViewNote={handleViewNote} onDeleteNote={handleOnDelete} />
       </div>
       {/* <SearchBar/> */}
 
@@ -85,7 +93,7 @@ function App() {
         opened={viewModalOpened}
         onClose={handleCloseModal}
         title={selectedNote?.title || "Note"}
-        size="lg"
+        size="sm"
       >
         {selectedNote &&
           (editedFiled === "title" ? (
@@ -127,7 +135,7 @@ function App() {
         )}
         <div>
           <Button
-          onClick={handleSaveEdit}>Update</Button>
+          onClick={handleSaveEdit} style={{width:"100%"}}>Update</Button>
         </div>
 
 

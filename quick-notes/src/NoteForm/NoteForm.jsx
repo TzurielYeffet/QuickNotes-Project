@@ -20,11 +20,13 @@ function NoteForm({onAddNote}) {
   return (
     <>
       <div className="input-container">
+        <h1 className="form-title">Create New Note</h1>
         <input type="text" onChange={(e)=>{setTitle(e.target.value)}} value={title} placeholder="Title" />
         <textarea
           name="note-content"
           value={content}
           id="note-content"
+          rows={6}
           placeholder="Your note..."
           onChange={(e)=>{setContent(e.target.value)}}
         />
