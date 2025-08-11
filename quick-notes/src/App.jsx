@@ -7,27 +7,58 @@ import NotesList from "./NotesList/NotesList.jsx";
 
 import "./App.css";
 
+const STORAGE_KEY = "quicknotes-data";
+let globalUntitledCounter = 1;
+const loadNotes = () => {
+  try {
+    const savedNotes = localStorage.getItem(STORAGE_KEY);
+    return savedNotes ? JSON.parse(savedNotes) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveNotes = (notes) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+  } catch (error) {
+    console.error("Failed to save: ", error);
+  }
+};
+
 function App() {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState(() => loadNotes());
   const [viewModalOpened, setViewModalOpened] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [editedFiled, setEditedFiled] = useState(null);
 
   const [editedTitle, setEditTitle] = useState("");
   const [editedContent, setEditContent] = useState("");
-  const [toBeDeleted,setOnDelete] = useState(false);
 
 
 
-const handleOnDelete = (note)=>{
-    const newNotes = notes.filter(item => item.id !== note.id)
-    setNotes(newNotes)
-}
+
+
+
+
+  const handleOnDelete = (note) => {
+    if (confirm("Are you sure you want to delete your note?")) {
+       const updatedNotesArray = notes.filter((item) => item.id !== note.id);
+      setNotes(updatedNotesArray);
+      saveNotes(updatedNotesArray);
+    } else {
+      return;
+    }
+  };
 
   const addNote = (noteData) => {
+    const untitledNumbers = notes.filter(item => !item.title.trim()).map(item=>item.untitledNumber||0)
+    const nextUntitltedNumber = untitledNumbers.length > 0 ? Math.max(...untitledNumbers)+1 :1;
+
     const newNote = {
       id: Date.now(),
       ...noteData,
+      untitledNumber : !noteData.title.trim() ? nextUntitltedNumber : null,
       date: new Date().toLocaleDateString("en-US", {
         month: "short",
         day: "2-digit",
@@ -36,7 +67,9 @@ const handleOnDelete = (note)=>{
         hour12: true,
       }),
     };
-    setNotes([...notes, newNote]);
+    const updatedNotesArray = [...notes, newNote];
+    setNotes(updatedNotesArray);
+    saveNotes(updatedNotesArray);
   };
 
   const handleViewNote = (note) => {
@@ -71,11 +104,13 @@ const handleOnDelete = (note)=>{
     };
 
     setSelectedNote(updatedNote);
-    setNotes(
-      notes.map((note) => (note.id === updatedNote.id ? updatedNote : note))
+    const updatedNotesArray = notes.map((note) =>
+      note.id === updatedNote.id ? updatedNote : note
     );
+    setNotes(updatedNotesArray);
+    saveNotes(updatedNotesArray);
     setEditedFiled(null);
-    setViewModalOpened(false)
+    setViewModalOpened(false);
   };
 
   return (
@@ -85,7 +120,11 @@ const handleOnDelete = (note)=>{
       </div>
 
       <div className="notes-list-container">
-        <NotesList notes={notes} onViewNote={handleViewNote} onDeleteNote={handleOnDelete} />
+        <NotesList
+          notes={notes}
+          onViewNote={handleViewNote}
+          onDeleteNote={handleOnDelete}
+        />
       </div>
       {/* <SearchBar/> */}
 
@@ -134,11 +173,10 @@ const handleOnDelete = (note)=>{
           </div>
         )}
         <div>
-          <Button
-          onClick={handleSaveEdit} style={{width:"100%"}}>Update</Button>
+          <Button onClick={handleSaveEdit} style={{ width: "100%" }}>
+            Update
+          </Button>
         </div>
-
-
 
         <div style={{ borderTop: "1px solid #eee", paddingTop: "1rem" }}>
           <small style={{ color: "#666" }}>
@@ -147,13 +185,13 @@ const handleOnDelete = (note)=>{
               ` Last modified: ${selectedNote?.lastModified}`}
           </small>
         </div>
-          <div>
-            {selectedNote?.category && (
-              <span style={{ marginLeft: "1rem", color: "#666" }}>
-                Category: {selectedNote?.category}
-              </span>
-            )}
-          </div>
+        <div>
+          {selectedNote?.category && (
+            <span style={{ marginLeft: "1rem", color: "#666" }}>
+              Category: {selectedNote?.category}
+            </span>
+          )}
+        </div>
       </Modal>
     </>
   );
