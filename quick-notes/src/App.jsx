@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Modal, Textarea, TextInput, Button } from "@mantine/core";
+import { use, useState } from "react";
+import { Modal, Textarea, TextInput, Button, Select } from "@mantine/core";
+import { CATEGORIES } from "./CategorySelector/CategorySelector.jsx";
+import { SearchBar } from "./SearchBar/SearchBar.jsx";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import NoteForm from "./NoteForm/NoteForm.jsx";
@@ -34,17 +36,17 @@ function App() {
 
   const [editedTitle, setEditTitle] = useState("");
   const [editedContent, setEditContent] = useState("");
+  const [displayNotes, setDisplayNotes] = useState(() => loadNotes());
 
-
-
-
-
-
+  const handleFilter = (filteredResults) => {
+    setDisplayNotes(filteredResults);
+  };
 
   const handleOnDelete = (note) => {
     if (confirm("Are you sure you want to delete your note?")) {
-       const updatedNotesArray = notes.filter((item) => item.id !== note.id);
+      const updatedNotesArray = notes.filter((item) => item.id !== note.id);
       setNotes(updatedNotesArray);
+      setDisplayNotes(updatedNotesArray);
       saveNotes(updatedNotesArray);
     } else {
       return;
@@ -52,13 +54,17 @@ function App() {
   };
 
   const addNote = (noteData) => {
-    const untitledNumbers = notes.filter(item => !item.title.trim()).map(item=>item.untitledNumber||0)
-    const nextUntitltedNumber = untitledNumbers.length > 0 ? Math.max(...untitledNumbers)+1 :1;
+    const untitledNumbers = notes
+      .filter((item) => !item.title.trim())
+      .map((item) => item.untitledNumber || 0);
+    const nextUntitltedNumber =
+      untitledNumbers.length > 0 ? Math.max(...untitledNumbers) + 1 : 1;
 
     const newNote = {
       id: Date.now(),
       ...noteData,
-      untitledNumber : !noteData.title.trim() ? nextUntitltedNumber : null,
+      category: noteData.category,
+      untitledNumber: !noteData.title.trim() ? nextUntitltedNumber : null,
       date: new Date().toLocaleDateString("en-US", {
         month: "short",
         day: "2-digit",
@@ -69,6 +75,7 @@ function App() {
     };
     const updatedNotesArray = [...notes, newNote];
     setNotes(updatedNotesArray);
+    setDisplayNotes(updatedNotesArray);
     saveNotes(updatedNotesArray);
   };
 
@@ -119,14 +126,17 @@ function App() {
         <NoteForm onAddNote={addNote} />
       </div>
 
-      <div className="notes-list-container">
-        <NotesList
-          notes={notes}
-          onViewNote={handleViewNote}
-          onDeleteNote={handleOnDelete}
-        />
+      <div className="search-container">
+        <SearchBar onFilter={handleFilter} notes={notes} />
+
+        <div className="notes-list-container">
+          <NotesList
+            notes={displayNotes}
+            onViewNote={handleViewNote}
+            onDeleteNote={handleOnDelete}
+          />
+        </div>
       </div>
-      {/* <SearchBar/> */}
 
       <Modal
         opened={viewModalOpened}
@@ -173,6 +183,18 @@ function App() {
           </div>
         )}
         <div>
+          <Select
+            label="Category"
+            value={selectedNote?.category || "personal"}
+            onChange={(value) => {
+              setSelectedNote((prev) => ({ ...prev, category: value }));
+            }}
+            data={Object.entries(CATEGORIES).map(([key, cat]) => ({
+              value: key,
+              label: cat.label,
+            }))}
+            style={{ marginBottom: "1rem" }}
+          />
           <Button onClick={handleSaveEdit} style={{ width: "100%" }}>
             Update
           </Button>

@@ -1,9 +1,14 @@
 import { useState } from 'react'
+import {CATEGORIES} from "../CategorySelector/CategorySelector.jsx"
 import './Note.css'
 
 function Note({ title, content, date, lastModify, category, onView, onDelete }) {
+  const noteColor =  CATEGORIES[category] || CATEGORIES["personal"]
   return (
-    <div className="note-container" onClick={onView} tabIndex={0}>
+    <div className="note-container" onClick={onView} tabIndex={0} 
+    style={{
+      backgroundColor:noteColor.color
+    }}>
 
       <h3 className="note-title" title={title}>
         {title}
